@@ -1,0 +1,21 @@
+#:schema https://rlbot.org/schemas/agent.json
+# The RLBot GUI only loads configs named bot.toml (or script.toml), so this is
+# training/bot.toml — a SEPARATE agent from the repo-root bot.toml (the student).
+#
+# root_dir = "" means run_command executes from this file's directory (training/),
+# matching the pattern in reference/python_example/bot.toml. Do NOT run the
+# recorder and the student on the same car.
+[settings]
+name = "TeacherRecorder"
+agent_id = "aviator/teacher-recorder"
+root_dir = ""
+run_command = "..\\.venv\\Scripts\\python.exe -I -u -B record_teacher.py --teacher smart"
+loadout_file = "../loadout.toml"
+logo_file = ""
+hivemind = false
+
+[details]
+description = "Scripted teacher that logs student-contract observations and teacher controls for imitation learning."
+developer = "Aviator"
+language = "Python"
+tags = ["1v1"]

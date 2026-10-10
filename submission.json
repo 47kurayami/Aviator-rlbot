@@ -3,7 +3,181 @@
   "name": "Aviator",
   "agent_id": "aviator/kurayami",
   "baseline_checkpoint_sha256": "579fa26010140514d2e9b7f0e2871bee569c594b7da8648e31ee1489007cd5b7",
-  "checkpoint_source": "Unchanged starter weights; no training performed by this tool",
-  "training_provenance": null,
-  "live_acceptance": "NOT TESTED for this submission"
+  "checkpoint_source": "Participant checkpoint",
+  "training_provenance": {
+    "dataset_version": "teacher-v2",
+    "dataset_manifest": "/Users/agastyamalik/Documents/GitHub/kura-rlbot/training/datasets/processed/dataset_manifest.json",
+    "split_method": "whole matches, shuffled with fixed seed",
+    "seed": 42,
+    "architecture": "13D -> Linear(13,64)+ReLU -> GRU(64,64) -> Linear(64,5); 4 mode logits + tanh steer; 26181 parameters",
+    "objective": "mode cross-entropy (class_weight=True) + 1.0 * Chase-masked steering MSE",
+    "checkpoint_selection": "lowest validation loss (mode CE + steer MSE); run stopped early, best.pt re-verified and evaluated by training/finalize.py",
+    "training_command": "python training/train.py --data training/datasets/processed --out training/runs --epochs 30 --chunk 120",
+    "epochs_planned": 30,
+    "epochs_run_before_early_stop": 17,
+    "tbptt_chunk": 120,
+    "hidden_state": "per-match recurrent stream; hidden detached between chunks; reset at match boundaries only",
+    "class_counts_train": null,
+    "dataset_matches": {
+      "train": 11,
+      "val": 2,
+      "test": 2
+    },
+    "validation_results": {
+      "Neutral": {
+        "support": 17162,
+        "precision": 0.9660908052541405,
+        "recall": 0.7885444586877987,
+        "f1": 0.868334937439846
+      },
+      "Chase": {
+        "support": 47731,
+        "precision": 0.9343916427693568,
+        "recall": 0.9557101254949614,
+        "f1": 0.9449306584085094
+      },
+      "Jump": {
+        "support": 383,
+        "precision": 0.08224400871459694,
+        "recall": 0.39425587467362927,
+        "f1": 0.13609734114465974
+      },
+      "Front dodge": {
+        "support": 1276,
+        "precision": 0.4104872881355932,
+        "recall": 0.6073667711598746,
+        "f1": 0.4898862199747155
+      },
+      "confusion": [
+        [
+          13533,
+          2595,
+          311,
+          723
+        ],
+        [
+          460,
+          45617,
+          1272,
+          382
+        ],
+        [
+          0,
+          224,
+          151,
+          8
+        ],
+        [
+          15,
+          384,
+          102,
+          775
+        ]
+      ],
+      "steer_mae_chase": 0.2580641508102417,
+      "loss": {
+        "ce": 0.2903430772563794,
+        "steer_mse": 0.12082159370913241
+      },
+      "flip": {
+        "segments": 102,
+        "hit_rate": 0.5980392156862745,
+        "mean_latency": 1.2622950819672132,
+        "by_mode": {
+          "Jump": {
+            "segments": 52,
+            "hit_rate": 0.4230769230769231
+          },
+          "Front dodge": {
+            "segments": 50,
+            "hit_rate": 0.78
+          }
+        }
+      }
+    },
+    "test_results": {
+      "Neutral": {
+        "support": 24142,
+        "precision": 0.9810893332020093,
+        "recall": 0.825200894706321,
+        "f1": 0.8964182865370771
+      },
+      "Chase": {
+        "support": 16942,
+        "precision": 0.8107651336679299,
+        "recall": 0.9344233266438438,
+        "f1": 0.8682132280355379
+      },
+      "Jump": {
+        "support": 448,
+        "precision": 0.10094909404659189,
+        "recall": 0.2611607142857143,
+        "f1": 0.14561294337274422
+      },
+      "Front dodge": {
+        "support": 1431,
+        "precision": 0.46501014198782964,
+        "recall": 0.6408106219426974,
+        "f1": 0.5389362327358214
+      },
+      "confusion": [
+        [
+          19922,
+          2960,
+          284,
+          976
+        ],
+        [
+          355,
+          15831,
+          685,
+          71
+        ],
+        [
+          6,
+          317,
+          117,
+          8
+        ],
+        [
+          23,
+          418,
+          73,
+          917
+        ]
+      ],
+      "steer_mae_chase": 0.17151357233524323,
+      "loss": {
+        "ce": 0.46566777690806654,
+        "steer_mse": 0.03618591240818377
+      },
+      "flip": {
+        "segments": 120,
+        "hit_rate": 0.55,
+        "mean_latency": 2.6515151515151514,
+        "by_mode": {
+          "Jump": {
+            "segments": 62,
+            "hit_rate": 0.27419354838709675
+          },
+          "Front dodge": {
+            "segments": 58,
+            "hit_rate": 0.8448275862068966
+          }
+        }
+      }
+    },
+    "checkpoint_sha256": "3c241d616142ad5ca4604a101ca05079b823ced27630a2115a1fbaed9d79fb00",
+    "cosine_similarity_vs_starter": 0.5602146983146667,
+    "environment": {
+      "python": "3.9.6",
+      "torch": "2.2.2",
+      "numpy": "1.26.4",
+      "device": "mps"
+    },
+    "limitations": "offline imitation metrics only; closed-loop gameplay not verified here; scripted teacher is imperfect and flip events are sparse; the run was stopped before all planned epochs; mixed reference/smart teacher data.",
+    "provenance_note": "generated post-hoc by training/finalize.py after an early stop"
+  },
+  "live_acceptance": "NOT TESTED after edits; run preflight and GUI match",
+  "checkpoint_sha256": "3c241d616142ad5ca4604a101ca05079b823ced27630a2115a1fbaed9d79fb00"
 }

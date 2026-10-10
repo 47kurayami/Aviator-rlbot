@@ -1,0 +1,12 @@
+{
+  "dataset_version": "replace-with-your-dataset-version",
+  "dataset_manifest": "training/datasets/processed/dataset_manifest.json",
+  "split_method": "whole matches, declared before fitting",
+  "seed": 42,
+  "architecture": "13D / encoder64 / GRU64 / mode4+steer; 26181 parameters",
+  "objective": "mode cross-entropy + Chase-masked steering MSE (describe actual coefficients)",
+  "checkpoint_selection": "describe the actual validation criterion used",
+  "training_command": "the exact command you ran",
+  "validation_results": "actual measured per-class recall, steering MAE, flip hit rate/latency",
+  "limitations": "actual remaining limitations, including that closed-loop gameplay was not verified offline"
+}
