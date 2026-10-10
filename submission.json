@@ -5,179 +5,176 @@
   "baseline_checkpoint_sha256": "579fa26010140514d2e9b7f0e2871bee569c594b7da8648e31ee1489007cd5b7",
   "checkpoint_source": "Participant checkpoint",
   "training_provenance": {
-    "dataset_version": "teacher-v2",
-    "dataset_manifest": "/Users/agastyamalik/Documents/GitHub/kura-rlbot/training/datasets/processed/dataset_manifest.json",
+    "dataset_version": "teacher-v3",
+    "dataset_manifest": "training/datasets/processed_v3/dataset_manifest.json",
     "split_method": "whole matches, shuffled with fixed seed",
     "seed": 42,
     "architecture": "13D -> Linear(13,64)+ReLU -> GRU(64,64) -> Linear(64,5); 4 mode logits + tanh steer; 26181 parameters",
-    "objective": "mode cross-entropy (class_weight=True) + 1.0 * Chase-masked steering MSE",
-    "checkpoint_selection": "lowest validation loss (mode CE + steer MSE); run stopped early, best.pt re-verified and evaluated by training/finalize.py",
-    "training_command": "python training/train.py --data training/datasets/processed --out training/runs --epochs 30 --chunk 120",
-    "epochs_planned": 30,
-    "epochs_run_before_early_stop": 17,
+    "objective": "mode cross-entropy (class_weight=True, class_weight_power=0.5) + 1.0 * Chase-masked steering MSE",
+    "checkpoint_selection": "lowest validation loss (mode CE + steer MSE)",
+    "training_command": "training\\train.py --data training\\datasets\\processed_v3 --out training\\runs --epochs 50 --chunk 120 --class-weight-power 0.5 --grad-clip 1.0",
+    "epochs": 50,
     "tbptt_chunk": 120,
-    "hidden_state": "per-match recurrent stream; hidden detached between chunks; reset at match boundaries only",
-    "class_counts_train": null,
-    "dataset_matches": {
-      "train": 11,
-      "val": 2,
-      "test": 2
+    "grad_clip": 1.0,
+    "hidden_state": "per-match recurrent stream; detached between chunks; reset at match boundaries only",
+    "class_counts_train": {
+      "Neutral": 148347,
+      "Chase": 234614,
+      "Jump": 3876,
+      "Front dodge": 12382
     },
     "validation_results": {
       "Neutral": {
-        "support": 17162,
-        "precision": 0.9660908052541405,
-        "recall": 0.7885444586877987,
-        "f1": 0.868334937439846
+        "support": 28376,
+        "precision": 0.9549118480621296,
+        "recall": 0.9142937693825768,
+        "f1": 0.9341614906832296
       },
       "Chase": {
-        "support": 47731,
-        "precision": 0.9343916427693568,
-        "recall": 0.9557101254949614,
-        "f1": 0.9449306584085094
+        "support": 65960,
+        "precision": 0.9579125328113183,
+        "recall": 0.9792753183747726,
+        "f1": 0.9684761340720139
       },
       "Jump": {
-        "support": 383,
-        "precision": 0.08224400871459694,
-        "recall": 0.39425587467362927,
-        "f1": 0.13609734114465974
+        "support": 748,
+        "precision": 0.4448871181938911,
+        "recall": 0.44786096256684493,
+        "f1": 0.4463690872751499
       },
       "Front dodge": {
-        "support": 1276,
-        "precision": 0.4104872881355932,
-        "recall": 0.6073667711598746,
-        "f1": 0.4898862199747155
+        "support": 2438,
+        "precision": 0.8727524204702628,
+        "recall": 0.7764561115668581,
+        "f1": 0.8217929238115912
       },
       "confusion": [
         [
-          13533,
-          2595,
-          311,
-          723
+          25944,
+          2135,
+          154,
+          143
         ],
         [
-          460,
-          45617,
-          1272,
-          382
+          993,
+          64593,
+          254,
+          120
         ],
         [
-          0,
-          224,
-          151,
-          8
+          36,
+          364,
+          335,
+          13
         ],
         [
-          15,
-          384,
-          102,
-          775
+          196,
+          339,
+          10,
+          1893
         ]
       ],
-      "steer_mae_chase": 0.2580641508102417,
+      "steer_mae_chase": 0.1807224601507187,
       "loss": {
-        "ce": 0.2903430772563794,
-        "steer_mse": 0.12082159370913241
+        "ce": 0.17237941949861613,
+        "steer_mse": 0.08260462488595587
       },
       "flip": {
-        "segments": 102,
-        "hit_rate": 0.5980392156862745,
-        "mean_latency": 1.2622950819672132,
+        "segments": 197,
+        "hit_rate": 0.7258883248730964,
+        "mean_latency": 1.167832167832168,
         "by_mode": {
           "Jump": {
-            "segments": 52,
-            "hit_rate": 0.4230769230769231
+            "segments": 101,
+            "hit_rate": 0.6237623762376238
           },
           "Front dodge": {
-            "segments": 50,
-            "hit_rate": 0.78
+            "segments": 96,
+            "hit_rate": 0.8333333333333334
           }
         }
       }
     },
     "test_results": {
       "Neutral": {
-        "support": 24142,
-        "precision": 0.9810893332020093,
-        "recall": 0.825200894706321,
-        "f1": 0.8964182865370771
+        "support": 37604,
+        "precision": 0.973780487804878,
+        "recall": 0.9343154983512393,
+        "f1": 0.9536398675424788
       },
       "Chase": {
-        "support": 16942,
-        "precision": 0.8107651336679299,
-        "recall": 0.9344233266438438,
-        "f1": 0.8682132280355379
+        "support": 56715,
+        "precision": 0.9510545640850483,
+        "recall": 0.9819095477386934,
+        "f1": 0.9662357942222608
       },
       "Jump": {
-        "support": 448,
-        "precision": 0.10094909404659189,
-        "recall": 0.2611607142857143,
-        "f1": 0.14561294337274422
+        "support": 643,
+        "precision": 0.459375,
+        "recall": 0.4572317262830482,
+        "f1": 0.4583008573655495
       },
       "Front dodge": {
-        "support": 1431,
-        "precision": 0.46501014198782964,
-        "recall": 0.6408106219426974,
-        "f1": 0.5389362327358214
+        "support": 2119,
+        "precision": 0.8737541528239202,
+        "recall": 0.7446908919301557,
+        "f1": 0.8040764331210191
       },
       "confusion": [
         [
-          19922,
-          2960,
-          284,
-          976
+          35134,
+          2184,
+          145,
+          141
         ],
         [
-          355,
-          15831,
-          685,
-          71
+          780,
+          55689,
+          163,
+          83
         ],
         [
-          6,
-          317,
-          117,
-          8
+          31,
+          314,
+          294,
+          4
         ],
         [
-          23,
-          418,
-          73,
-          917
+          135,
+          368,
+          38,
+          1578
         ]
       ],
-      "steer_mae_chase": 0.17151357233524323,
+      "steer_mae_chase": 0.17152900993824005,
       "loss": {
-        "ce": 0.46566777690806654,
-        "steer_mse": 0.03618591240818377
+        "ce": 0.1883093110293895,
+        "steer_mse": 0.06422589431079655
       },
       "flip": {
-        "segments": 120,
-        "hit_rate": 0.55,
-        "mean_latency": 2.6515151515151514,
+        "segments": 176,
+        "hit_rate": 0.7102272727272727,
+        "mean_latency": 1.208,
         "by_mode": {
           "Jump": {
-            "segments": 62,
-            "hit_rate": 0.27419354838709675
+            "segments": 90,
+            "hit_rate": 0.5777777777777777
           },
           "Front dodge": {
-            "segments": 58,
-            "hit_rate": 0.8448275862068966
+            "segments": 86,
+            "hit_rate": 0.8488372093023255
           }
         }
       }
     },
-    "checkpoint_sha256": "3c241d616142ad5ca4604a101ca05079b823ced27630a2115a1fbaed9d79fb00",
-    "cosine_similarity_vs_starter": 0.5602146983146667,
     "environment": {
-      "python": "3.9.6",
-      "torch": "2.2.2",
-      "numpy": "1.26.4",
-      "device": "mps"
+      "python": "3.12.10",
+      "torch": "2.6.0+cu124",
+      "numpy": "2.5.3",
+      "device": "cuda"
     },
-    "limitations": "offline imitation metrics only; closed-loop gameplay not verified here; scripted teacher is imperfect and flip events are sparse; the run was stopped before all planned epochs; mixed reference/smart teacher data.",
-    "provenance_note": "generated post-hoc by training/finalize.py after an early stop"
+    "limitations": "offline imitation metrics only; closed-loop gameplay not verified here; scripted teacher is imperfect and flip events are sparse; validate live in the GUI."
   },
   "live_acceptance": "NOT TESTED after edits; run preflight and GUI match",
-  "checkpoint_sha256": "3c241d616142ad5ca4604a101ca05079b823ced27630a2115a1fbaed9d79fb00"
+  "checkpoint_sha256": "f387c1c219726bae658d5451ccf79248c13a9ecc46bc94f815c7a38e94ed4169"
 }

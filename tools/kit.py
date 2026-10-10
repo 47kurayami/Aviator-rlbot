@@ -11,6 +11,9 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 EXCLUDED = {'.venv', 'venv', 'logs', '__pycache__', '.git', 'runs', 'datasets', 'training'}
+# OS junk that appears/disappears by machine (macOS Finder, Windows Explorer).
+# Skipping it keeps the manifest byte-identical across macOS/Windows/Linux.
+IGNORED = {'.DS_Store', 'Thumbs.db', 'desktop.ini'}
 CONTROL = {'participant_manifest.json', 'participant_manifest.sha256'}
 RUNTIME_FILES = ('model/V13.pt','src/policy.py','src/observation_contract.py',
                  'src/prediction.py','src/runtime.py','src/bot.py')
@@ -21,8 +24,12 @@ def sha(path):
 def files(root):
     result=[]
     for base,dirs,names in os.walk(root,followlinks=False):
-        dirs[:]=[x for x in dirs if x not in EXCLUDED]
+        # Skip virtualenvs by prefix: '.venv' is listed, but '.venv-train' and any
+        # other '.venv*' env must also be ignored or the manifest swallows a whole
+        # CUDA torch install and hashing never finishes.
+        dirs[:]=[x for x in dirs if x not in EXCLUDED and not x.startswith('.venv')]
         for name in names:
+            if name in IGNORED:continue
             p=Path(base)/name
             if p.suffix.lower() in {'.pyc','.zip'} or name in CONTROL:continue
             assert not p.is_symlink() and p.resolve().is_relative_to(root.resolve()), 'External file link: '+str(p)
@@ -33,8 +40,10 @@ def manifest(root):
     value = {'format': 'v13_participant_kit_v3',
              'files': {p.relative_to(root).as_posix(): sha(p) for p in files(root)}}
     path = root/'participant_manifest.json'
-    path.write_text(json.dumps(value, indent=2)+'\n', encoding='utf-8')
-    (root/'participant_manifest.sha256').write_text(sha(path)+'\n', encoding='ascii')
+    # newline='\n' everywhere: the kit hashes exact bytes, so a Windows run must
+    # not emit CRLF or the hashes diverge from macOS/Linux checkouts.
+    path.write_text(json.dumps(value, indent=2)+'\n', encoding='utf-8', newline='\n')
+    (root/'participant_manifest.sha256').write_text(sha(path)+'\n', encoding='ascii', newline='\n')
     return value
 
 def verify(root):
@@ -61,20 +70,20 @@ def fork(destination, name, agent_id):
         q=destination/p.relative_to(ROOT);q.parent.mkdir(parents=True,exist_ok=True);shutil.copyfile(p,q)
     config=destination/'bot.toml'
     config.write_text(config.read_text().replace('name = "V13"', 'name = '+json.dumps(name))
-                      .replace('shryssssss/v13', agent_id), encoding='utf-8')
+                      .replace('shryssssss/v13', agent_id), encoding='utf-8', newline='\n')
     for filename in ('bot.py','preflight.py'):
         p=destination/'src'/filename
-        p.write_text(p.read_text().replace('shryssssss/v13', agent_id), encoding='utf-8')
+        p.write_text(p.read_text().replace('shryssssss/v13', agent_id), encoding='utf-8', newline='\n')
     runtime=destination/'src/runtime.py'
     text=runtime.read_text()
     line="        if saved['dataset_manifest_sha256']!=DATASET_PIN:raise RuntimeError('Checkpoint dataset identity mismatch')"
     assert line in text, 'Unexpected baseline runtime'
-    runtime.write_text(text.replace(line, '        # Participant fork: training provenance is recorded in submission.json.'), encoding='utf-8')
+    runtime.write_text(text.replace(line, '        # Participant fork: training provenance is recorded in submission.json.'), encoding='utf-8', newline='\n')
     submission={'kind':'participant_editable_fork','name':name,'agent_id':agent_id,
                 'baseline_checkpoint_sha256':'579fa26010140514d2e9b7f0e2871bee569c594b7da8648e31ee1489007cd5b7',
                 'checkpoint_source':'Unchanged starter weights; no training performed by this tool',
                 'training_provenance':None,'live_acceptance':'NOT TESTED for this fork'}
-    (destination/'submission.json').write_text(json.dumps(submission,indent=2)+'\n')
+    (destination/'submission.json').write_text(json.dumps(submission,indent=2)+'\n', newline='\n')
     refresh(destination)
     print('FORK CREATED:',destination,'Run its setup.ps1, then register its bot.toml.')
 
@@ -84,7 +93,7 @@ def refresh(root):
     value['version']='participant_upgrade'
     value['files']={name:sha(root/name) for name in RUNTIME_FILES}
     value['checkpoint_sha256']=sha(root/'model/V13.pt')
-    candidate.write_text(json.dumps(value,indent=2)+'\n')
+    candidate.write_text(json.dumps(value,indent=2)+'\n', newline='\n')
     manifest(root)
 
 def seal(checkpoint, provenance):
@@ -115,11 +124,11 @@ def seal(checkpoint, provenance):
     runtime=ROOT/'src/runtime.py';text=runtime.read_text()
     text,count=re.subn(r"^PIN = '[0-9a-f]{64}'$", "PIN = '"+sha(ROOT/'model/V13.pt')+"'",text,flags=re.M)
     assert count==1, 'Cannot locate exact runtime checkpoint pin'
-    ast.parse(text);runtime.write_text(text,encoding='utf-8')
+    ast.parse(text);runtime.write_text(text,encoding='utf-8',newline='\n')
     submission.update(checkpoint_sha256=sha(ROOT/'model/V13.pt'),training_provenance=notes,
                       checkpoint_source='Participant checkpoint' if changed else 'Unchanged starter weights',
                       live_acceptance='NOT TESTED after edits; run preflight and GUI match')
-    (ROOT/'submission.json').write_text(json.dumps(submission,indent=2)+'\n')
+    (ROOT/'submission.json').write_text(json.dumps(submission,indent=2)+'\n', newline='\n')
     refresh(ROOT);verify(ROOT)
     print('SEALED WITH ORIGINAL 13D/GRU SHAPES. Run src/preflight.py, then GUI. No fitting performed.')
 
@@ -129,20 +138,20 @@ def init_repo(name, agent_id):
     assert re.fullmatch(r'[A-Za-z0-9_-]+/[A-Za-z0-9_-]+', agent_id), 'Use author/bot identifier'
     config=ROOT/'bot.toml'
     config.write_text(config.read_text().replace('name = "V13"', 'name = '+json.dumps(name))
-                      .replace('shryssssss/v13', agent_id), encoding='utf-8')
+                      .replace('shryssssss/v13', agent_id), encoding='utf-8', newline='\n')
     for filename in ('bot.py','preflight.py'):
         p=ROOT/'src'/filename
-        p.write_text(p.read_text().replace('shryssssss/v13', agent_id), encoding='utf-8')
+        p.write_text(p.read_text().replace('shryssssss/v13', agent_id), encoding='utf-8', newline='\n')
     runtime=ROOT/'src/runtime.py'
     text=runtime.read_text()
     line="        if saved['dataset_manifest_sha256']!=DATASET_PIN:raise RuntimeError('Checkpoint dataset identity mismatch')"
     if line in text:
-        runtime.write_text(text.replace(line, '        # Participant repo: training provenance is recorded in submission.json.'), encoding='utf-8')
+        runtime.write_text(text.replace(line, '        # Participant repo: training provenance is recorded in submission.json.'), encoding='utf-8', newline='\n')
     submission={'kind':'participant_editable_fork','name':name,'agent_id':agent_id,
                 'baseline_checkpoint_sha256':'579fa26010140514d2e9b7f0e2871bee569c594b7da8648e31ee1489007cd5b7',
                 'checkpoint_source':'Unchanged starter weights; no training performed by this tool',
                 'training_provenance':None,'live_acceptance':'NOT TESTED for this submission'}
-    (ROOT/'submission.json').write_text(json.dumps(submission,indent=2)+'\n')
+    (ROOT/'submission.json').write_text(json.dumps(submission,indent=2)+'\n', newline='\n')
     refresh(ROOT)
     print('INITIALIZED IN-PLACE:', name, agent_id)
 

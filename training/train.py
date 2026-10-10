@@ -39,17 +39,22 @@ def chunks(n, size):
         yield start, min(start + size, n)
 
 
-def class_weights(matches, device):
+def class_weights(matches, device, power=1.0):
     counts = np.zeros(4, dtype=np.float64)
     for match in matches:
         for k in range(4):
             counts[k] += int((match["mode"] == k).sum())
     counts = np.maximum(counts, 1.0)
-    weights = counts.sum() / (4.0 * counts)
+    # Inverse-frequency weights, tempered by `power`:
+    #   power=1.0 -> full inverse frequency (the aggressive weighting that
+    #                over-predicted rare classes and needed recalibration)
+    #   power=0.5 -> sqrt weighting (milder; the Phase 2 choice)
+    #   power=0.0 -> uniform (equivalent to --no-class-weight)
+    weights = (counts.sum() / (4.0 * counts)) ** power
     return torch.tensor(weights, dtype=torch.float32, device=device), counts
 
 
-def train_epoch(model, matches, opt, device, chunk, steer_weight, ce_weight):
+def train_epoch(model, matches, opt, device, chunk, steer_weight, ce_weight, grad_clip=0.0):
     model.train()
     total_ce = total_st = steps = 0.0
     for i in np.random.permutation(len(matches)):
@@ -68,6 +73,8 @@ def train_epoch(model, matches, opt, device, chunk, steer_weight, ce_weight):
             loss = loss_ce + steer_weight * loss_st
             opt.zero_grad()
             loss.backward()
+            if grad_clip and grad_clip > 0:
+                torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
             opt.step()
             hidden = hidden.detach()
             total_ce += float(loss_ce)
@@ -166,6 +173,11 @@ def main():
     parser.add_argument("--lr", type=float, default=3e-4)
     parser.add_argument("--steer-weight", type=float, default=1.0)
     parser.add_argument("--class-weight", action=argparse.BooleanOptionalAction, default=True)
+    parser.add_argument("--class-weight-power", type=float, default=1.0,
+                        help="exponent on the inverse-frequency weights; 1.0=full, "
+                             "0.5=milder, 0.0=uniform")
+    parser.add_argument("--grad-clip", type=float, default=1.0,
+                        help="max gradient norm (0 disables); stabilises TBPTT late in training")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--device", default="auto", help="auto, cpu, or cuda")
     args = parser.parse_args()
@@ -193,7 +205,7 @@ def main():
 
     model = Policy().to(device)
     assert sum(p.numel() for p in model.parameters()) == 26181, "unexpected parameter count"
-    ce_weight, counts = class_weights(train, device)
+    ce_weight, counts = class_weights(train, device, args.class_weight_power)
     if not args.class_weight:
         ce_weight = None
     optimizer = torch.optim.Adam(model.parameters(), lr=args.lr)
@@ -208,7 +220,7 @@ def main():
     best_score = float("inf")
     best_val = None
     for epoch in range(1, args.epochs + 1):
-        tr = train_epoch(model, train, optimizer, device, args.chunk, args.steer_weight, ce_weight)
+        tr = train_epoch(model, train, optimizer, device, args.chunk, args.steer_weight, ce_weight, args.grad_clip)
         vm = evaluate(model, val, device, args.chunk, args.steer_weight) if val else None
         score = (vm["loss"]["ce"] + args.steer_weight * vm["loss"]["steer_mse"]) if vm else tr["ce"]
         history.append({"epoch": epoch, "train": tr, "val": vm, "score": score})
@@ -239,12 +251,14 @@ def main():
         "seed": args.seed,
         "architecture": "13D -> Linear(13,64)+ReLU -> GRU(64,64) -> Linear(64,5); "
                         "4 mode logits + tanh steer; 26181 parameters",
-        "objective": f"mode cross-entropy (class_weight={args.class_weight}) + "
+        "objective": f"mode cross-entropy (class_weight={args.class_weight}, "
+                     f"class_weight_power={args.class_weight_power}) + "
                      f"{args.steer_weight} * Chase-masked steering MSE",
         "checkpoint_selection": "lowest validation loss (mode CE + steer MSE)",
         "training_command": " ".join(sys.argv),
         "epochs": args.epochs,
         "tbptt_chunk": args.chunk,
+        "grad_clip": args.grad_clip,
         "hidden_state": "per-match recurrent stream; detached between chunks; reset at match boundaries only",
         "class_counts_train": {MODE_NAMES[k]: int(counts[k]) for k in range(4)},
         "validation_results": best_val,

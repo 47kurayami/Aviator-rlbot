@@ -1,7 +1,7 @@
 {
   "format": "v13_runtime_integrity_v1",
   "version": "participant_upgrade",
-  "checkpoint_sha256": "3c241d616142ad5ca4604a101ca05079b823ced27630a2115a1fbaed9d79fb00",
+  "checkpoint_sha256": "f387c1c219726bae658d5451ccf79248c13a9ecc46bc94f815c7a38e94ed4169",
   "features13": [
     "ball_forward",
     "ball_right",
@@ -28,11 +28,11 @@
     "handbrake"
   ],
   "files": {
-    "model/V13.pt": "3c241d616142ad5ca4604a101ca05079b823ced27630a2115a1fbaed9d79fb00",
-    "src/policy.py": "e6508a0ab29be40be51a6e1859bfb6d63a1072e9c87c1ddbdde0cbf78e4df810",
+    "model/V13.pt": "f387c1c219726bae658d5451ccf79248c13a9ecc46bc94f815c7a38e94ed4169",
+    "src/policy.py": "3792a06682a286231a24ea1855900e339a795706cd6441969910b37a2ed20537",
     "src/observation_contract.py": "e0f59f763d33e59f6815a86e9c452b3fcade87fe26727ca53c910ebb7e6db750",
-    "src/prediction.py": "7b06f25657476b6d8fc8f67c0d834a8166cce7a76cfd8f3404ea0c634c0c466f",
-    "src/runtime.py": "3d547ddaa3514ebf171ce488b5b4b32ea7a4bdb08d68fa08555306617974f0e6",
+    "src/prediction.py": "33151c9103584604a74a29243226f43c693c81f4d54e7227f09545dda390bc80",
+    "src/runtime.py": "caf479282071dfbbd255133cb2232aa84e3c6fc73dd419bb6bc363e94a52c8ab",
     "src/bot.py": "76a51033a73b0f74ceaf55a794e707b8fdf4dce28ac4ace081a67ca65a63940d"
   }
 }

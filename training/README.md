@@ -67,6 +67,23 @@ python training/train.py --data training/datasets/processed --out training/runs 
 Watch per-class recall for `Jump` / `Front dodge` and the flip hit-rate/latency,
 not just aggregate accuracy.
 
+## 3b. Calibrate the rare-class bias (fast, no retrain)
+
+Class-weighted CE makes the policy over-predict the up-weighted rare classes
+(the sealed run hopped constantly). `recalibrate.py` removes that bias by
+subtracting `alpha*log(class_weight)` from the four mode logits, folded into the
+existing `head.bias` — no shape or parameter change:
+
+```bash
+python training/recalibrate.py --checkpoint training/runs/<ts>/best.pt \
+    --data training/datasets/processed \
+    --out training/runs/<ts>/best_calibrated.pt --alpha 0.35
+```
+
+`alpha=1.0` fully removes the weighting bias (can zero out Jump); `alpha≈0.35`
+puts predicted Jump/Front-dodge back on the teacher's true base rate. It writes
+`provenance_calibrated.json`, sealable directly. Runs on macOS/Windows/Linux.
+
 ## 4. Seal, preflight, submit
 
 ```bash
