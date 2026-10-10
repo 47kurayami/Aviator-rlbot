@@ -10,7 +10,7 @@ import shutil
 import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
-EXCLUDED = {'.venv', 'venv', 'logs', '__pycache__', '.git', 'runs', 'datasets'}
+EXCLUDED = {'.venv', 'venv', 'logs', '__pycache__', '.git', 'runs', 'datasets', 'training'}
 CONTROL = {'participant_manifest.json', 'participant_manifest.sha256'}
 RUNTIME_FILES = ('model/V13.pt','src/policy.py','src/observation_contract.py',
                  'src/prediction.py','src/runtime.py','src/bot.py')
