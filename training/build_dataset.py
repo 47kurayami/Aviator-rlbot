@@ -105,9 +105,14 @@ def main():
     ids = sorted(matches)
     order = np.random.default_rng(args.seed).permutation(len(ids))
     n = len(ids)
-    n_train = max(1, int(round(n * args.train_frac)))
-    n_val = max(1, int(round(n * args.val_frac))) if n - n_train > 1 else 0
-    n_train = min(n_train, n - n_val)
+    if n >= 3:
+        n_val = max(1, int(round(n * args.val_frac)))
+        n_test = max(1, int(round(n * (1.0 - args.train_frac - args.val_frac))))
+        n_train = n - n_val - n_test
+    elif n == 2:
+        n_train, n_val, n_test = 1, 1, 0
+    else:
+        n_train, n_val, n_test = 1, 0, 0
     split_ids = {"train": [], "val": [], "test": []}
     for rank, idx in enumerate(order):
         if rank < n_train:

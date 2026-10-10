@@ -32,9 +32,11 @@ One process == one match == one JSONL file. Each line is one processed callback:
 ```
 
 `obs` is produced through the same `live_adapter(...)[:13]` path the shipped
-runtime uses, so the student sees identical features. `--teacher dense` (edit
-`training/bot.toml`) adds extra jump/flip events to balance the rare modes; the
-default `reference` teacher matches `reference/python_example/src/bot.py`.
+runtime uses, so the student sees identical features. `training/bot.toml`
+sets `--teacher smart`, which adds purposeful jump/flip events — grounded,
+aimed at a close ball, on the side that sends it toward the opponent goal — so
+the teacher keeps playing well while producing flip examples; the default
+`reference` teacher matches `reference/python_example/src/bot.py`.
 
 ## 2. Build the dataset
 
@@ -57,6 +59,8 @@ python training/train.py --data training/datasets/processed --out training/runs 
 - One recurrent stream per match; hidden detached between TBPTT chunks; reset
   only at match boundaries.
 - Loss: mode cross-entropy (class-weighted by default) + Chase-masked steering MSE.
+- Device auto-detects CUDA → Apple MPS → CPU, so the same command is fast on a
+  Mac GPU and on Windows.
 - `best.pt` is selected by lowest validation loss. It is a plain
   `{"state_dict": ...}`, ready for `kit.py seal`.
 
@@ -89,6 +93,9 @@ python training/train.py --epochs 2 --chunk 40 --out training/runs/smoke
 - Offline metrics are not closed-loop gameplay. A learner changes the states it
   later sees, so teacher-forced validation overstates competence. Run a live GUI
   match before promoting any model.
-- The scripted teacher only exercises the four shipped modes and rarely flips;
-  `--teacher dense` improves coverage but is not the reference behaviour.
+- The plain scripted teacher only exercises the four shipped modes and rarely
+  flips. `--teacher smart` improves flip coverage by flipping only when aimed at
+  a close ball; it deviates from the raw reference behaviour and must be
+  disclosed as an augmentation. Verify it still beats the same opponents before
+  trusting the data (an indiscriminate flip teacher plays *worse*).
 - The reference scripted bot must never be used as a live fallback controller.

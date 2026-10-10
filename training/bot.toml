@@ -9,7 +9,7 @@
 name = "TeacherRecorder"
 agent_id = "aviator/teacher-recorder"
 root_dir = ""
-run_command = "..\\.venv\\Scripts\\python.exe -I -u -B record_teacher.py"
+run_command = "..\\.venv\\Scripts\\python.exe -I -u -B record_teacher.py --teacher smart"
 loadout_file = "../loadout.toml"
 logo_file = ""
 hivemind = false

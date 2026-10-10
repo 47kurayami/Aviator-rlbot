@@ -1,9 +1,9 @@
 {
   "format": "v13_participant_kit_v3",
   "files": {
-    ".DS_Store": "ff075d741efa162f6ba9ef875242b307ec1da7f2fa1e1fd49112b0220ea7bd1e",
+    ".DS_Store": "7c99f39c3ed91bce89f62a4361f6f571188227e2e43580ae94428e0fda9c9a9d",
     ".github/workflows/validate.yml": "b3b932984a53c17b6f6cacf79c1c23c689353b631a57a45a4403bb47ea64f242",
-    ".gitignore": "57a765d52598970552b2dff951fc54397dab68123ac910dc990a01318e8b33f2",
+    ".gitignore": "bda05649efe7596d811ed9a4d1570db69f6128f1dea773c040c2ad5874fd7eb7",
     "CHECK.cmd": "c8acae5d0fa6b779252726715af49a0cc4e86a08a6548fd5e6c87e18e6c5cdfe",
     "LICENSE_RLBOT.txt": "b6706a274db8a56d5cdcb526960373bc61f771e1622db714361c3c7c647dd0fd",
     "MAKE_SHAREABLE.ps1": "5b643fb61383a492c434d5f7bf383c95722abfdb76d11188925e3f80c153d5b4",
@@ -11,7 +11,7 @@
     "SETUP.cmd": "45747bcd95fa16cf039e64839d34e875b46f34c7095c72ced1116942b793c753",
     "START_HERE.txt": "643e85b1414abf43e75aef74ec88b3665d6b44a1985c7e8bc0ec7cf03bb30fc0",
     "bot.toml": "5bce3765a936ed73419bd0f4bcc55536745da49f20b6ad2fccf2b7049e574c8d",
-    "candidate_manifest.json": "5d4cd1694d10a03c51fb944a72a2ead2d950da7a46807f1190b190991fa90462",
+    "candidate_manifest.json": "6b1040ec22c0ccf90edcc1e21907d4174a11b2354723d05fb2b069e82f80a80f",
     "docs/CONTRACT.md": "2b53353ffd8d8a86a4cf395abcb82e1636cb1c4f20f9a6439ac709b526d1696b",
     "docs/IMPROVING_THE_BOT.md": "1257f9b4d8f595b2cca0ed1df4ce92c2657143cbf4c4179aec97b48d9eb67c63",
     "docs/ORGANISER_GUIDE.md": "3b1ff1ece24135638d2689dfaabb413e8be4938e65e515a663243133487568e8",
@@ -22,7 +22,7 @@
     "docs/SUBMISSION.md": "71b6378efbcb0d13f5e1030033b49b2a842acae7af95a086c0a2732aef419ea4",
     "docs/TESTING.md": "074d6cce3fdcdbe0a463dc0f38db520622e47dd50ed194b5f93db61ae61fd39b",
     "loadout.toml": "42314d5fc0695b34b9407df7e55a6e98e01350f2b8784992554a6fdaf35bca80",
-    "model/V13.pt": "579fa26010140514d2e9b7f0e2871bee569c594b7da8648e31ee1489007cd5b7",
+    "model/V13.pt": "3c241d616142ad5ca4604a101ca05079b823ced27630a2115a1fbaed9d79fb00",
     "reference/.DS_Store": "beea54d8898746fe3aaee0ee6452fb29b703186ef7d0311934ae08b5950b9ccd",
     "reference/python_example/.DS_Store": "08bab1c8a2da624d64cc7da748d9fd12703d41a17dbcb44faef940ce5c6cb8fc",
     "reference/python_example/LICENSE": "b6706a274db8a56d5cdcb526960373bc61f771e1622db714361c3c7c647dd0fd",
@@ -46,8 +46,8 @@
     "src/policy.py": "e6508a0ab29be40be51a6e1859bfb6d63a1072e9c87c1ddbdde0cbf78e4df810",
     "src/prediction.py": "7b06f25657476b6d8fc8f67c0d834a8166cce7a76cfd8f3404ea0c634c0c466f",
     "src/preflight.py": "8da7220bfa0424ced0bd2267db0866e5605ebd135606653eb6301b4f8813c853",
-    "src/runtime.py": "3cc201b1185a9a6cb11ab4ac26dfd11af4a31338d406c335b18795409bdc90fe",
-    "submission.json": "04597424f9c82f5cd30c268634d0a29173edb60b77046d07938da388903d6957",
+    "src/runtime.py": "3d547ddaa3514ebf171ce488b5b4b32ea7a4bdb08d68fa08555306617974f0e6",
+    "submission.json": "6b940c20cf5db92a526eae79ec9e3ca262f11f54d1d74d32821537a470a5fb81",
     "tools/kit.py": "bf1aea96e5b0e6abab44d7ce4447fc1e062fcbe178787d7b42091ec54abf596b",
     "tools/validate_submission.py": "afe4ebfd1d79c42e2a81833812ccf1cbb68141bf90d977819e7f1b6b65646e38"
   }

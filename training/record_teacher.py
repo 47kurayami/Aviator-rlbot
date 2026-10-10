@@ -32,11 +32,21 @@ from observation_contract import live_adapter  # noqa: E402
 from prediction import find_slice_at_time  # noqa: E402
 from runtime import CHANNELS  # noqa: E402
 from util.drive import steer_toward_target  # noqa: E402
+from util.orientation import Orientation, relative_location  # noqa: E402
 from util.sequence import ControlStep, Sequence  # noqa: E402
 from util.vec import Vec3  # noqa: E402
 
 AGENT_ID = "aviator/teacher-recorder"
 NEUTRAL = [0.0, 0.0, 0.0, 0.0, 0.0, False, False, False]
+GOAL_X = {0: 4096.0, 1: -4096.0}  # x of the goal each team attacks
+
+
+def hits_toward_goal(car_loc, ball_loc, opp_goal_x):
+    """True if driving forward into the ball would push it toward the opponent
+    goal, i.e. the car is behind the ball rather than goal-side of it."""
+    to_ball = (ball_loc - car_loc).flat()
+    ball_to_goal = Vec3(opp_goal_x - ball_loc.x, -ball_loc.y, 0.0)
+    return to_ball.dot(ball_to_goal) > 0.0
 
 
 class TeacherRecorder(Bot):
@@ -93,10 +103,11 @@ class TeacherRecorder(Bot):
         car_loc = Vec3(car.physics.location)
         car_vel = Vec3(car.physics.velocity)
         ball_loc = Vec3(packet.balls[0].physics.location)
-        if self.teacher_mode == "dense":
-            dense = self._dense(packet, car_loc, ball_loc, car_vel)
-            if dense is not None:
-                return self.channels(dense)
+        opp_goal_x = GOAL_X.get(int(self.team), 4096.0)
+        if self.teacher_mode == "smart":
+            purposeful = self._smart(packet, car_loc, ball_loc, car_vel, opp_goal_x)
+            if purposeful is not None:
+                return self.channels(purposeful)
         if 750 < car_vel.length() < 800:
             return self.channels(self._front_flip(packet))
         target = ball_loc
@@ -105,22 +116,34 @@ class TeacherRecorder(Bot):
             future = find_slice_at_time(self.ball_prediction, packet.match_info.seconds_elapsed + 2.0)
             if future is not None:
                 target = Vec3(future.physics.location)
+        elif not hits_toward_goal(car_loc, ball_loc, opp_goal_x):
+            # Overcommitted: don't knock the ball toward our own net. Swing to the
+            # goal-side of the ball and hit it the right way instead.
+            goal_dir = Vec3(opp_goal_x - ball_loc.x, -ball_loc.y, 0.0)
+            if goal_dir.length() > 1.0:
+                target = ball_loc - goal_dir.normalized() * 260.0
         controls = flat.ControllerState()
         controls.steer = steer_toward_target(car, target)
         controls.throttle = 1.0
         return self.channels(controls)
 
-    def _dense(self, packet, car_loc, ball_loc, car_vel):
-        """Optional augmented heuristic: extra jump/flip events for label coverage."""
+    def _smart(self, packet, car_loc, ball_loc, car_vel, opp_goal_x):
+        """Purposeful flips: only dodge/jump when grounded, aimed at a close ball
+        on the correct side, so the touch sends it toward the opponent goal and the
+        teacher keeps playing well while producing flip examples."""
         now = float(packet.match_info.seconds_elapsed)
-        if now < self.flip_cooldown:
+        if now < self.flip_cooldown or car_loc.z > 120:
             return None
-        grounded = car_loc.z < 120
+        ori = Orientation(packet.players[self.index].physics.rotation)
+        rel = relative_location(car_loc, ori, ball_loc)  # x=forward, y=right, z=up
         dist = car_loc.dist(ball_loc)
-        if grounded and dist < 900 and car_vel.length() > 700:
-            self.flip_cooldown = now + 1.5
+        facing = rel.x > 0 and abs(rel.y) < 0.6 * max(rel.x, 1.0)
+        if not facing or not hits_toward_goal(car_loc, ball_loc, opp_goal_x):
+            return None
+        if dist < 450 and car_vel.length() > 300:
+            self.flip_cooldown = now + 1.2
             return self._front_flip(packet)
-        if grounded and dist < 800 and ball_loc.z > car_loc.z + 250:
+        if dist < 500 and ball_loc.z > car_loc.z + 250:
             self.flip_cooldown = now + 1.0
             return self._jump(packet)
         return None
@@ -180,7 +203,8 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--teacher", choices=("reference", "dense"), default="reference",
-                        help="reference = exact python-example teacher; dense = reference plus extra flip/jump events")
+    parser.add_argument("--teacher", choices=("reference", "smart"), default="reference",
+                        help="reference = exact python-example teacher; smart = reference plus "
+                             "purposeful dodge/jump when grounded and aimed at a close ball")
     cli = parser.parse_args()
     TeacherRecorder(cli.teacher).run(wants_ball_predictions=True, wants_match_communications=False)
