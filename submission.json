@@ -1,0 +1,9 @@
+{
+  "kind": "participant_editable_fork",
+  "name": "Aviator",
+  "agent_id": "aviator/kurayami",
+  "baseline_checkpoint_sha256": "579fa26010140514d2e9b7f0e2871bee569c594b7da8648e31ee1489007cd5b7",
+  "checkpoint_source": "Unchanged starter weights; no training performed by this tool",
+  "training_provenance": null,
+  "live_acceptance": "NOT TESTED for this submission"
+}
