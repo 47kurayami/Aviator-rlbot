@@ -1,3 +1,6 @@
+#MAIN BRANCH IS THE FINAL VERSION OF BOT
+
+
 # Model Wars · RLBot Machine Learning Tournament
 
 [![Validate Bot Submission](https://github.com/Model-Wars/Model-Wars-Base-Repository/actions/workflows/validate.yml/badge.svg)](https://github.com/Model-Wars/Model-Wars-Base-Repository/actions/workflows/validate.yml)
