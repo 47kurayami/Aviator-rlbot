@@ -1,0 +1,19 @@
+#:schema https://rlbot.org/schemas/agent.json
+# Phase 3 DAgger recorder — a SEPARATE agent from training/bot.toml.
+# The STUDENT (model/V13.pt) drives the car; the scripted teacher's action is
+# logged as the label. root_dir = "" runs from this file's directory
+# (training/dagger/), so paths step up two levels to the repo root.
+[settings]
+name = "DaggerRecorder"
+agent_id = "aviator/dagger-recorder"
+root_dir = ""
+run_command = "..\\..\\.venv\\Scripts\\python.exe -I -u -B ..\\record_dagger.py --teacher smart --checkpoint ..\\..\\model\\V13.pt"
+loadout_file = "../../loadout.toml"
+logo_file = ""
+hivemind = false
+
+[details]
+description = "Phase 3 DAgger: student-driven rollout logged with scripted-teacher labels for retraining."
+developer = "Aviator"
+language = "Python"
+tags = ["1v1"]

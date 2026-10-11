@@ -1,0 +1,37 @@
+#:schema https://rlbot.org/schemas/match.json
+# Phase 3 DAgger match configuration (RLBot v5).
+#
+# Launched programmatically by training/run_dagger_matches.py through
+# rlbot.managers.MatchManager.start_match, which talks to the already-running
+# RLBot server -- no GUI clicking required. Can also be loaded by hand in the GUI
+# (Load Match Config) if wanted.
+#
+# Car 1 = the DAgger recorder: the STUDENT (model/V13.pt) drives, the scripted
+#         teacher supplies the label. Writes one JSONL per match to
+#         training/datasets/raw_dagger/.
+# Car 2 = a built-in Psyonix AllStar opponent (no extra process, deterministic).
+#
+# config_file / loadout_file paths are resolved relative to THIS file.
+
+[rlbot]
+auto_start_agents = true
+wait_for_agents = true
+
+[match]
+skip_replays = true
+instant_start = true
+enable_rendering = false
+game_mode = "Soccar"
+existing_match_behavior = "Restart"
+
+[[cars]]
+type = "rlbot"
+config_file = "bot.toml"
+name = "DaggerRecorder"
+team = "blue"
+
+[[cars]]
+type = "psyonix"
+name = "AllStar"
+team = "orange"
+skill = "AllStar"

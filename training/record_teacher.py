@@ -50,6 +50,8 @@ def hits_toward_goal(car_loc, ball_loc, opp_goal_x):
 
 
 class TeacherRecorder(Bot):
+    AGENT_ID = AGENT_ID  # subclasses (e.g. the DAgger recorder) may override
+
     def __init__(self, teacher_mode):
         self.teacher_mode = teacher_mode
         self.previous_elapsed = None
@@ -63,7 +65,7 @@ class TeacherRecorder(Bot):
         self.match_id = f"{stamp}_{os.getpid()}"
         self.file = None
         self.path = None
-        super().__init__(AGENT_ID)
+        super().__init__(self.AGENT_ID)
 
     def initialize(self):
         self.raw_dir.mkdir(parents=True, exist_ok=True)

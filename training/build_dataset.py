@@ -77,8 +77,12 @@ def load_match(path):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--raw", type=Path, default=Path("training/datasets/raw"))
+    parser.add_argument("--raw", type=Path, nargs="+", default=[Path("training/datasets/raw")],
+                        help="one or more raw recording dirs (later dirs can hold DAgger data)")
     parser.add_argument("--out", type=Path, default=Path("training/datasets/processed"))
+    parser.add_argument("--fixed-splits", type=Path, default=None,
+                        help="reuse an existing splits.json; any match not listed there is "
+                             "added to TRAIN (keeps val/test identical across rounds)")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--train-frac", type=float, default=0.70)
     parser.add_argument("--val-frac", type=float, default=0.15)
@@ -87,9 +91,9 @@ def main():
     parser.add_argument("--version", default="scripted-teacher-v1")
     args = parser.parse_args()
 
-    raw_files = sorted(args.raw.glob("*.jsonl"))
+    raw_files = sorted(p for directory in args.raw for p in directory.glob("*.jsonl"))
     if not raw_files:
-        raise SystemExit(f"no raw recordings in {args.raw}")
+        raise SystemExit(f"no raw recordings in {[str(d) for d in args.raw]}")
     args.out.mkdir(parents=True, exist_ok=True)
 
     matches = {}
@@ -103,24 +107,35 @@ def main():
         raise SystemExit("no usable recordings")
 
     ids = sorted(matches)
-    order = np.random.default_rng(args.seed).permutation(len(ids))
-    n = len(ids)
-    if n >= 3:
-        n_val = max(1, int(round(n * args.val_frac)))
-        n_test = max(1, int(round(n * (1.0 - args.train_frac - args.val_frac))))
-        n_train = n - n_val - n_test
-    elif n == 2:
-        n_train, n_val, n_test = 1, 1, 0
+    if args.fixed_splits:
+        fixed = json.loads(args.fixed_splits.read_text(encoding="utf-8"))
+        split_ids = {k: list(fixed[k]) for k in ("train", "val", "test")}
+        assigned = set(split_ids["train"]) | set(split_ids["val"]) | set(split_ids["test"])
+        missing = sorted(i for i in assigned if i not in matches)
+        if missing:
+            raise SystemExit(f"fixed splits reference {len(missing)} missing matches, e.g. {missing[:3]}")
+        extra = [i for i in ids if i not in assigned]
+        split_ids["train"].extend(extra)
+        print(f"fixed splits: {len(fixed['train'])} train + {len(extra)} new -> train")
     else:
-        n_train, n_val, n_test = 1, 0, 0
-    split_ids = {"train": [], "val": [], "test": []}
-    for rank, idx in enumerate(order):
-        if rank < n_train:
-            split_ids["train"].append(ids[idx])
-        elif rank < n_train + n_val:
-            split_ids["val"].append(ids[idx])
+        order = np.random.default_rng(args.seed).permutation(len(ids))
+        n = len(ids)
+        if n >= 3:
+            n_val = max(1, int(round(n * args.val_frac)))
+            n_test = max(1, int(round(n * (1.0 - args.train_frac - args.val_frac))))
+            n_train = n - n_val - n_test
+        elif n == 2:
+            n_train, n_val, n_test = 1, 1, 0
         else:
-            split_ids["test"].append(ids[idx])
+            n_train, n_val, n_test = 1, 0, 0
+        split_ids = {"train": [], "val": [], "test": []}
+        for rank, idx in enumerate(order):
+            if rank < n_train:
+                split_ids["train"].append(ids[idx])
+            elif rank < n_train + n_val:
+                split_ids["val"].append(ids[idx])
+            else:
+                split_ids["test"].append(ids[idx])
 
     raw_hashes = {p.name: sha256(p) for p in raw_files}
     processed_hashes = {}

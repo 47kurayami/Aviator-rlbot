@@ -1,7 +1,7 @@
 {
   "format": "v13_runtime_integrity_v1",
   "version": "participant_upgrade",
-  "checkpoint_sha256": "f387c1c219726bae658d5451ccf79248c13a9ecc46bc94f815c7a38e94ed4169",
+  "checkpoint_sha256": "4dcb952f47eb585d4d9d243c5ecefee611ab9d55d87a2e337578b6bcbe8117b8",
   "features13": [
     "ball_forward",
     "ball_right",
@@ -28,11 +28,11 @@
     "handbrake"
   ],
   "files": {
-    "model/V13.pt": "f387c1c219726bae658d5451ccf79248c13a9ecc46bc94f815c7a38e94ed4169",
+    "model/V13.pt": "4dcb952f47eb585d4d9d243c5ecefee611ab9d55d87a2e337578b6bcbe8117b8",
     "src/policy.py": "3792a06682a286231a24ea1855900e339a795706cd6441969910b37a2ed20537",
     "src/observation_contract.py": "e0f59f763d33e59f6815a86e9c452b3fcade87fe26727ca53c910ebb7e6db750",
     "src/prediction.py": "33151c9103584604a74a29243226f43c693c81f4d54e7227f09545dda390bc80",
-    "src/runtime.py": "caf479282071dfbbd255133cb2232aa84e3c6fc73dd419bb6bc363e94a52c8ab",
+    "src/runtime.py": "f0e592ef885ba26727a29e5eec56b313c7ac789c1a645805dfe67464643beebc",
     "src/bot.py": "76a51033a73b0f74ceaf55a794e707b8fdf4dce28ac4ace081a67ca65a63940d"
   }
 }
