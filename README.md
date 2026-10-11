@@ -1,4 +1,4 @@
-#MAIN BRANCH IS THE FINAL VERSION OF BOT
+# MAIN BRANCH IS THE FINAL VERSION OF BOT
 
 
 # Model Wars · RLBot Machine Learning Tournament
